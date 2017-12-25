@@ -1,0 +1,135 @@
+#include <math.h>
+#include "sdl2game.h"
+
+const int SIZE_WIDTH = 958;   //窗口宽度
+const int SIZE_HEIGHT = 720;  //窗口高度
+const int CIRCLE_X = 450;     // 圆心 x 坐标
+const int CIRCLE_Y = 600;     // 圆心 y 坐标
+const float SPEED = 3.0;      //小球移动速度
+
+Image *bottle;
+Image *brbottle;
+Sound *breaksound;
+Bool shoot = FALSE;
+float shooting = 0;
+float shoot_x = 0, shoot_y = 0;//鼠标的位置
+float x = 450, y = 600;//圆心移动的增减变量
+Bool shoot_win1 = FALSE;//1瓶被砸中
+Bool shoot_win2 = FALSE;//2瓶被砸中
+Bool shoot_win3 = FALSE;//3瓶被砸中
+Bool shoot_win4 = FALSE;//4瓶被砸中
+Bool shoot_win5 = FALSE;//5瓶被砸中
+float a;
+Bool sou = FALSE;
+
+//第二关瓶子移动的变量；
+//Bool round=TRUE;//表示关卡数，true为第一关，false为第二关。
+// 初始化
+void setup() {
+    size(SIZE_WIDTH, SIZE_HEIGHT);
+    bgimage("image/bg.PNG");
+    bottle = loadimage("image/bottle1.PNG");
+    brbottle = loadimage("image/brbottle1.PNG");
+    breaksound = loadsound("sound/1345.wav");
+}
+
+// 界面绘图
+void draw(float stateTime) {
+    //变为初始状态
+    //瓶子图形，开始为完整瓶，砸中后为破碎瓶
+    if (shoot_win1) { image(brbottle, 134 + 150 * 0, 184 + 127 - 36); } else image(bottle, 134 + 150 * 0, 184);
+    if (shoot_win2) { image(brbottle, 134 + 150 * 1, 184 + 127 - 36); } else image(bottle, 134 + 150 * 1, 184);
+    if (shoot_win3) { image(brbottle, 134 + 150 * 2, 184 + 127 - 36); } else image(bottle, 134 + 150 * 2, 184);
+    if (shoot_win4) { image(brbottle, 134 + 150 * 3, 184 + 127 - 36); } else image(bottle, 134 + 150 * 3, 184);
+    if (shoot_win5) { image(brbottle, 134 + 150 * 4, 184 + 127 - 36); } else image(bottle, 134 + 150 * 4, 184);
+
+    color(0, 0, 255);
+    fillcircle(CIRCLE_X, CIRCLE_Y, 30);
+
+    //圆的发射
+    fillcircle(x, y, 30);
+    if (shoot) {
+        float vx = 1, vy = 1;//X，Y轴移动的速度变量
+        if (x == shoot_x) {
+            vx = 0;
+            vy = 1;
+        } else {
+            a = (shoot_y - y) / (shoot_x - x);
+            vx = sqrt(SPEED / (1 + a * a));
+            vy = a * vx;
+            if (a < 0) {
+                vx = -vx;
+                vy = -vy;
+            }
+        }
+        x -= vx;
+        y -= vy;
+        if (y < 184 - 36 || y > SIZE_HEIGHT || x < 0 || x > SIZE_WIDTH) {
+            x = CIRCLE_X;
+            y = CIRCLE_Y;
+            shoot_x = 0;
+            shoot_y = 0;
+            shoot = FALSE;
+            if (shoot_win1 && shoot_win2 && shoot_win3 && shoot_win4 && shoot_win5) {
+                shoot_win1 = FALSE;
+                shoot_win2 = FALSE;
+                shoot_win3 = FALSE;
+                shoot_win4 = FALSE;
+                shoot_win5 = FALSE;
+            }
+        }
+        if ((x >= 134 + 150 * 0) && (x <= 134 + 150 * 0 + 29) && (y <= 184 + 127 - 36)) {
+            if (!shoot_win1)
+                playtimedsound(breaksound, 500);
+            shoot_win1 = TRUE;
+        } else if ((x >= 134 + 150 * 1) && (x <= 134 + 150 * 1 + 29) && (y <= 184 + 127 - 36)) {
+            if (!shoot_win2)
+                playtimedsound(breaksound, 500);
+            shoot_win2 = TRUE;
+        } else if ((x >= 134 + 150 * 2) && (x <= 134 + 150 * 2 + 29) && (y <= 184 + 127 - 36)) {
+            if (!shoot_win3)
+                playtimedsound(breaksound, 500);
+            shoot_win3 = TRUE;
+        } else if ((x >= 134 + 150 * 3) && (x <= 134 + 150 * 3 + 29) && (y <= 184 + 127 - 36)) {
+            if (!shoot_win4)
+                playtimedsound(breaksound, 500);
+            shoot_win4 = TRUE;
+        } else if ((x >= 134 + 150 * 4) && (x <= 134 + 150 * 4 + 29) && (y <= 184 + 127 - 36)) {
+            if (!shoot_win5)
+                playtimedsound(breaksound, 500);
+            shoot_win5 = TRUE;
+        }
+    }
+}
+
+
+// 鼠标事件处理
+void mousePress() {
+    if (shoot) {
+        shoot_x = mouseX;
+        shoot_y = mouseY;
+    }
+}
+
+void mouseMove() {
+
+}
+
+void mouseRelease() {
+    if (!shoot)
+        shoot = !shoot;
+}
+
+// 键盘事件处理函数
+void keyDown() {
+}
+
+void keyUp() {
+}
+
+// 程序结束时回收游戏资源
+void close() {
+    unloadimage(bottle);
+    unloadimage(brbottle);
+    unloadsound(breaksound);
+}
